@@ -6,8 +6,8 @@ import plotly_express as px
 
 # @st.cache
 def read_data():
-    # path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
-    path = "combined_csv.csv"
+    path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
+    # path = "combined_csv.csv"
     data = pd.read_csv(path).drop_duplicates()
     # print(data.shape)
     # print(data.columns)
@@ -84,7 +84,11 @@ w_ht_ft = query_df.loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 st.write(w_ht_ft)
 
 '''
-this is a wip. please wait for more updates! <3 Nabil.
+'''
+
+'''
+### Thanks for visiting! <3
+Please wait for more updates! 
 '''
 
 
