@@ -24,7 +24,7 @@ def read_data():
 read_data()
 
 '''
-# Find out your team's performance in the PL from starting from 2009/10 season till 2018/2019.
+# Find out your team's performance in the PL starting from 2009/10 season till 2018/2019.
 '''
 clubs = st.selectbox('Pick your club:', read_data.teams)
 
