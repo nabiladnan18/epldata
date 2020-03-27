@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-data = pd.read_csv("combined_csv.csv")
+data = pd.read_csv("combined_csv.csv").drop_duplicates()
 print(data.shape)
 print(data.columns)
 # print(data.head(10))
@@ -25,7 +25,7 @@ for i in teams:
     played_home = table.query(f"HomeTeam == '{i}'", inplace=False)  # home
     played_away = table.query(f"AwayTeam == '{i}'", inplace=False)  # away
     # played_total_by_2 = int((len(played_away) + len(played_home))/2)
-    played_total = int((len(played_away) + len(played_home)) / 2)
+    played_total = int((len(played_away) + len(played_home)))
 
     # number of seasons appeared
     no_of_seasons = int(played_total/38)
@@ -38,7 +38,7 @@ for i in teams:
     # total games won and lost
     total_home_wins = table.query(f"HomeTeam == '{i}' and FTR == 'H'", inplace=False)
     total_away_wins = table.query(f"AwayTeam == '{i}' and FTR == 'A'", inplace=False)
-    total_wins = int((len(total_home_wins) + len(total_away_wins))/2)
+    total_wins = int((len(total_home_wins) + len(total_away_wins)))
     total_losses = played_total - total_wins
 
     # pc of winning after being ahead at HT at home

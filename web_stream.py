@@ -6,8 +6,9 @@ import plotly_express as px
 
 # @st.cache
 def read_data():
-    url = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
-    data = pd.read_csv(url)
+    # path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
+    path = "combined_csv.csv"
+    data = pd.read_csv(path).drop_duplicates()
     # print(data.shape)
     # print(data.columns)
     # print(data.head(10))
@@ -25,11 +26,7 @@ read_data()
 '''
 # Find out your team's performance in the PL from starting from 2009/10 season till 2018/2019.
 '''
-clubs = st.selectbox('Pick your clubs:', read_data.teams)
-st.subheader("Winning at half time and full time")
-query_df = read_data.table.query(f"HomeTeam == '{clubs}' and HTR == 'H' and FTR == 'H'", inplace=False)
-w_ht_ft = query_df.loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
-st.write(w_ht_ft)
+clubs = st.selectbox('Pick your club:', read_data.teams)
 
 home_waht_waft = read_data.table.query(f"HomeTeam == '{clubs}' and HTR == 'H' and FTR == 'H'", inplace=False)
 
@@ -68,13 +65,31 @@ pc_of_win = round((total_wins / played_total) * 100, ndigits=2)
 # analytics
 
 f'''
-## Some key statistics
+## Key statistics for {clubs}
 
 Won {pc_of_win}% of all matches played.\n
 Won {pc_of_ftw_htw}% of home games after being ahead at half-time.\n
 Lost {pc_of_ftl_htw}% of home games after being ahead at half-time.\n
 Played a total of {played_total} matches or {no_of_seasons} season(s) since 2009-10.\n
 '''
+
+st.subheader(f"Winning at half time and full time at home: {len(home_waht_waft)} time(s)")
+query_df = read_data.table.query(f"HomeTeam == '{clubs}' and HTR == 'H' and FTR == 'H'", inplace=False)
+w_ht_ft = query_df.loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+st.write(w_ht_ft)
+
+st.subheader(f"Winning at half time but losing at full time at home: {len(home_waht_laft)} time(s)")
+query_df = read_data.table.query(f"HomeTeam == '{clubs}' and HTR == 'H' and FTR == 'A'", inplace=False)
+w_ht_ft = query_df.loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+st.write(w_ht_ft)
+
+'''
+this is a wip. please wait for more updates! <3 Nabil.
+'''
+
+
+
+
 
 if __name__ == "__main__":
     read_data()
