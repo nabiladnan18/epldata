@@ -15,4 +15,3 @@ epl.py
 join_files.py
 processor.py
 venv/
-/combined_csv.csv
