@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-data = pd.read_csv("/home/nabil/Downloads/english-premier-league_zip/data/combined_csv.csv")
+data = pd.read_csv("combined_csv.csv")
 print(data.shape)
 print(data.columns)
 # print(data.head(10))

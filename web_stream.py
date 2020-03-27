@@ -6,7 +6,7 @@ import plotly_express as px
 
 # @st.cache
 def read_data():
-    data = pd.read_csv("/home/nabil/Downloads/english-premier-league_zip/data/combined_csv.csv")
+    data = pd.read_csv("combined_csv.csv")
     # print(data.shape)
     # print(data.columns)
     # print(data.head(10))
