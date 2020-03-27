@@ -1,0 +1,17 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/.gitignore
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/untitled1.iml
+.idea/vcs.xml
+__pycache__/
+anything_but_2015
+before_2020
+data.json
+epl.py
+join_files.py
+processor.py
+venv/
