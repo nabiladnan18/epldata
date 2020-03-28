@@ -6,8 +6,8 @@ import plotly_express as px
 
 # @st.cache
 def read_data():
-    path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
-    # path = "combined_csv.csv"
+    path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv4.csv"
+    # path = "combined_csv4.csv"
     data = pd.read_csv(path)
     # print(data.shape)
     # print(data.columns)
