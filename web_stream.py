@@ -8,7 +8,7 @@ import plotly_express as px
 def read_data():
     path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_csv.csv"
     # path = "combined_csv.csv"
-    data = pd.read_csv(path).drop_duplicates()
+    data = pd.read_csv(path)
     # print(data.shape)
     # print(data.columns)
     # print(data.head(10))
@@ -90,9 +90,6 @@ st.write(w_ht_ft)
 ### Thanks for visiting! <3
 Please wait for more updates! 
 '''
-
-
-
 
 
 if __name__ == "__main__":

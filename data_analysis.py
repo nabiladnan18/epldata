@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-data = pd.read_csv("combined_csv.csv").drop_duplicates()
+data = pd.read_csv("combined_csv.csv")
 print(data.shape)
 print(data.columns)
 # print(data.head(10))
@@ -74,8 +74,3 @@ plt.tick_params(axis='x', labelsize=10)
 plt.xticks(rotation=90)
 plt.bar(teams, pc_wins)
 plt.show()
-
-
-
-
-
