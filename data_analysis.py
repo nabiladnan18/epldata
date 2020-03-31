@@ -55,7 +55,7 @@ for i in teams:
         "##############################"'\n'
         f"{i}"'\n'
         "##############################"'\n'
-               
+
         f"> Won {pc_of_win}% of all matches played."'\n'
         f"> Won {pc_of_ftw_htw}% of home games after being ahead at half-time."'\n'
         f"> Lost {pc_of_ftl_htw}% of home games after being ahead at half-time."'\n'
