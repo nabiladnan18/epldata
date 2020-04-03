@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 import plotly_express as px
+import numpy as np
 
 
 # path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_3800_rows.csv"
@@ -22,10 +23,6 @@ teams = sorted(unsorted_teams)
 
 def data(selection):
 
-    # DF Write Columns #
-
-    # loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
-
     #####################
     # GENERAL STATISTICS
     #####################
@@ -33,16 +30,31 @@ def data(selection):
     # total number of games played
     played_home = table.query(f"HomeTeam == '{selection}'", inplace=False)      # HOME df
     played_away = table.query(f"AwayTeam == '{selection}'", inplace=False)      # AWAY df
-    played_total = played_home + played_away        # TOTAL df
+    played_total = played_home + played_away
     played_total_count = len(played_total)       # TOTAL COUNT
+    played_home_count = len(played_home)        # total home games count
+    played_away_count = len(played_away)        # total away games count
 
     # total games won and lost
     total_home_wins = table.query(f"HomeTeam == '{selection}' and FTR == 'H'", inplace=False)       # home wins df
     total_away_wins = table.query(f"AwayTeam == '{selection}' and FTR == 'A'", inplace=False)       # away wins df
+    total_home_losses = table.query(f"HomeTeam == '{selection}' and FTR == 'A'", inplace=False)     # home losses df
+    total_away_losses = table.query(f"AwayTeam == '{selection}' and FTR == 'H'", inplace=False)     # away losses df
+
     total_wins = total_home_wins + total_away_wins      # total wins df
     total_wins_count = len(total_wins)          # total wins count
-    total_losses = played_total_count - total_wins      # played total df
+    total_losses = played_total - total_wins      # played total df
     total_losses_count = played_total_count - total_wins_count        # total losses count
+    total_home_wins_count = len(total_home_wins)        # total home wins count
+    total_away_wins_count = len(total_away_wins)        # total away wins count
+
+    # test block #
+    # if total_losses_count == len(total_away_losses) + len(total_home_losses):
+    #     print("Issallgood, man!)
+    # else:
+    #     print("DF is fucked")
+    #     raise AssertionError
+    # end test block #
 
     # number of seasons appeared
     no_of_seasons = played_total_count / 38      # number of seasons count
@@ -59,12 +71,42 @@ def data(selection):
 
     # Winning at HT and FT at HOME
     home_waht_waft = table.query(f"HomeTeam == '{selection}' and HTR == 'H' and FTR == 'H'", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    home_waht_waft_count = len(home_waht_waft)
 
     # Winning with more than 3 goals and a 2-goal GD
-    domination_win = table.query(f"HomeTeam == '{selection}' and FTHG > 3 and FTAG < 2", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    total_home_wins['gd'] = total_home_wins["FTHG"].sub(total_home_wins["FTAG"])
+    total_away_wins['gd'] = total_away_wins["FTAG"].sub(total_away_wins["FTHG"])
+    domination_wins_home = total_home_wins.loc[total_home_wins['gd'] > 2]
+    domination_wins_away = total_away_wins.loc[total_away_wins['gd'] > 2]
+    domination_win_at_home_count = len(domination_wins_home)
+    domination_win_at_away_count = len(domination_wins_away)
+    domination_wins = domination_wins_home.append(domination_wins_away).loc[:, ["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    domination_win_count = len(domination_wins)
 
     # Winning with more than 2 goals and a clean-sheet
-    domination_with_cs = table.query(f"HomeTeam == '{selection}' and FTHG > 2 and FTAG == 0", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "HTHG"]]
+    domination_with_cs = table.query(f"HomeTeam == '{selection}' and FTHG > 2 and FTAG == 0", inplace=False).loc[:, ["Date", "HomeTeam", "AwayTeam", "FTHG", "HTHG"]]
+
+    # pc of winning after being ahead at HT at home
+    pc_of_ftw_htw = round((home_waht_waft_count / played_home_count) * 100, ndigits=2)
+
+    # pc of total wins
+    pc_of_win = round((total_wins_count / played_total_count) * 100, ndigits=2)
+
+    # Biggest win - home
+    # biggest_win_home_index = total_home_wins['gd'].idxmax()
+    biggest_win_home_index = total_home_wins[["FTHG"]].idxmax()
+    biggest_win_home_df = total_home_wins.loc[biggest_win_home_index, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    biggest_win_home_gs = total_home_wins.loc[biggest_win_home_index, "FTHG"].values[0]
+    biggest_win_home_gc = total_home_wins.loc[biggest_win_home_index, "FTAG"].values[0]
+    biggest_win_home_opponent = total_home_wins.loc[biggest_win_home_index, "AwayTeam"].values[0]
+
+    # Biggest win - away
+    # biggest_win_away_index = total_away_wins[["gd"]].idxmax()
+    biggest_win_away_index = total_away_wins[["FTAG"]].idxmax()
+    biggest_win_away_df = total_away_wins.loc[biggest_win_away_index, ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    biggest_win_away_gc = total_away_wins.loc[biggest_win_away_index, "FTHG"].values[0]
+    biggest_win_away_gs = total_away_wins.loc[biggest_win_away_index, "FTAG"].values[0]
+    biggest_win_away_opponent = total_away_wins.loc[biggest_win_away_index, "HomeTeam"].values[0]
 
     #####################
     # COMEBACK STATISTICS
@@ -72,9 +114,14 @@ def data(selection):
 
     # losing at HT then winning at FT at HOME df
     home_laht_waft = table.query(f"HomeTeam == '{selection}' and HTR == 'A' and FTR == 'H'", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
-
+    home_laht_waft_count = len(home_laht_waft)
+    pc_of_home_laht_waft = round((home_laht_waft_count / played_home_count) * 100, ndigits=2)
+    
+    
     # losing at HT then winning at FT at AWAY df
-    away_laht_waft = table.query(f"AwayTeam == '{selection}' and HTR == 'H' and FTR == 'A'", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    away_laht_waft = table.query(f"AwayTeam == '{selection}' and HTR == 'H' and FTR == 'A'", inplace=False).loc[:, ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    away_laht_waft_count = len(away_laht_waft)
+    pc_of_away_laht_waft = round((away_laht_waft_count / played_away_count) * 100, ndigits=2)
 
     # losing at HT then winning at FT df
     total_laht_waft = home_laht_waft + away_laht_waft
@@ -82,54 +129,86 @@ def data(selection):
     # losing at HT then winning at FT count
     total_laht_waft_count = len(total_laht_waft)
 
-
-
     #####################
     # OOPSIE STATISTICS
     #####################
 
     # matches lost after being ahead at half-time at home
     home_waht_laft = table.query(f"HomeTeam == '{selection}' and HTR == 'H' and FTR == 'A'", inplace=False).loc[:, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
-
-    # pc of winning after being ahead at HT at home
-    pc_of_ftw_htw = round((len(home_waht_waft) / len(played_home)) * 100, ndigits=2)
+    home_waht_laft_count = len(home_waht_laft)
 
     # pc of losing after being ahead at HT at home
-    pc_of_ftl_htw = round((len(home_waht_laft) / len(played_home)) * 100, ndigits=2)
+    pc_of_ftl_htw = round((home_waht_laft_count / played_home_count) * 100, ndigits=2)
 
-    # pc of total wins
-    pc_of_win = round((total_wins_count / played_total_count) * 100, ndigits=2)
+    # Biggest loss - home
+    total_home_losses['gd'] = total_home_losses["FTAG"].sub(total_home_losses["FTHG"], axis=0)
+    biggest_loss_home = total_home_losses.query("gd > 2", inplace=False)
+    biggest_loss_home_index = biggest_loss_home[["gd"]].idxmax()
+    biggest_loss_home_df = biggest_loss_home.loc[
+        biggest_loss_home_index,
+        ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]
+    ]
+    biggest_loss_home_gs = biggest_loss_home.loc[biggest_loss_home_index, "FTHG"].values[0]
+    biggest_loss_home_gc = biggest_loss_home.loc[biggest_loss_home_index, "FTAG"].values[0]
+    biggest_loss_home_opponent = biggest_loss_home.loc[biggest_loss_home_index, "AwayTeam"].values[0]
 
-# analytics
+    # Biggest loss - away
+    total_away_losses['gd'] = total_away_losses["FTHG"].sub(total_away_losses["FTAG"], axis=0)
+    biggest_loss_away = total_away_losses.query("gd > 2", inplace=False)
+    biggest_loss_away_index = biggest_loss_away[["gd"]].idxmax()
+    biggest_loss_away_df = biggest_loss_away.loc[
+        biggest_loss_away_index,
+        ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]
+    ]
+    biggest_loss_away_gc = total_away_losses.loc[biggest_loss_away_index, "FTHG"].values[0]
+    biggest_loss_away_gs = total_away_losses.loc[biggest_loss_away_index, "FTAG"].values[0]
+    biggest_loss_away_opponent = total_away_losses.loc[biggest_loss_away_index, "HomeTeam"].values[0]
+
+    # analytics
 
     f''' ## General statistics for {selection}
     
     Won {pc_of_win}% of all matches played.\n
-
-    \n
     Played a total of {played_total_count} matches or {no_of_seasons} season(s) since 2009-10.\n
     Kept a total of {clean_sheets_count} clean sheets.\n
 
     '''
 
-    '## Domination'
+    '## > We fought them hard, we fought them well'
 
-    f'### Won {pc_of_ftw_htw}% of home games after being ahead at half-time: {len(home_waht_waft)} time(s)'
+    f'### Won {pc_of_ftw_htw}% of home games after being ahead at half-time: {home_waht_waft_count} time(s)'
     st.write(home_waht_waft)
 
-    f'### Won by over 3 goals with at least 2 GD: {len(domination_win)}times(s)'
-    st.write(domination_win)
+    f'### Won by over 3 goals with at least 2 GD. Home: {domination_win_at_home_count} time(s). ' \
+        f'Away: {domination_win_at_away_count} time(s)'
+    st.write(domination_wins)
 
-    '## Comeback'
+    f'### Biggest victory at home: {biggest_win_home_gs}-{biggest_win_home_gc} against {biggest_win_home_opponent}'
+    st.write(biggest_win_home_df)
 
+    f'### Biggest victory away: {biggest_win_away_gc}-{biggest_win_away_gs} against {biggest_win_away_opponent}'
+    st.write(biggest_win_away_df)
 
+    '## > Hairdryer treatment from the Gaffer?'
 
+    f'### Won {pc_of_home_laht_waft}% of home matches after losing at half time: {home_laht_waft_count} time(s)'
+    st.write(home_laht_waft)
 
+    f'### Won {pc_of_away_laht_waft}% of away matches after losing at half time: {away_laht_waft_count} times(s)'
+    st.write(away_laht_waft)
 
-
-    '## Oopsies'
+    '## > Shame! _ding_ Shame! _ding_ '
     f"### Lost {pc_of_ftl_htw}% of home games after being ahead at half-time: {len(home_waht_laft)} time(s)"
     st.write(home_waht_laft)
+
+    f'### Biggest loss at home: {biggest_loss_home_gs}-{biggest_loss_home_gc} against {biggest_loss_home_opponent}'
+    st.write(biggest_loss_home_df)
+
+    f'### Biggest loss away: {biggest_loss_away_gc}-{biggest_loss_away_gs} against {biggest_loss_away_opponent}'
+    st.write(biggest_loss_away_df)
+
+
+    # '## Win statistics for all teams'
 
 
     '''
