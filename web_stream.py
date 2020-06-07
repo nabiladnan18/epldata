@@ -119,9 +119,10 @@ def data(selection):
     # biggest_win_home = total_home_wins.loc[(((total_home_wins["FTHG"] == total_home_wins["FTHG"].max()) > (
     # total_home_wins["gd"] == total_home_wins["gd"].max())) & (total_home_wins["FTHG"] != total_home_wins["FTAG"]))["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
-    biggest_win_home = total_home_wins.loc[(total_home_wins["gd"] == total_home_wins["gd"].max()) & (
-                total_home_wins["FTHG"] == total_home_wins["FTHG"].max()),
-                                           ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    biggest_win_home_gd = total_home_wins.loc[(total_home_wins["gd"] == total_home_wins["gd"].max())]
+
+    biggest_win_home = biggest_win_home_gd.loc[(biggest_win_home_gd["FTHG"] == biggest_win_home_gd["FTHG"].max()),
+                                               ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
     # yeah i know the first thing is not required.
     # wrote it just so that I remember that you can write multiple conditions like that.
@@ -148,11 +149,10 @@ def data(selection):
     #     biggest_win_away_gs = total_away_wins.loc[i, "FTAG"].values[0]
     #     biggest_win_away_opponent = total_away_wins.loc[i, "HomeTeam"].values[0]
 
-    biggest_win_away = total_away_wins.loc[((total_away_wins["FTAG"] == total_away_wins["FTAG"].max()) & (
-            total_away_wins["FTAG"] != total_away_wins["FTHG"]) & (
-                                                    total_away_wins["gd"] == total_away_wins["gd"].max())),
-                                           ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    biggest_win_away_gd = total_away_wins.loc[total_away_wins["gd"] == total_away_wins["gd"].max()]
 
+    biggest_win_away = biggest_win_away_gd.loc[(biggest_win_away_gd["FTHG"] == biggest_win_away_gd["FTHG"].max()),
+                                               ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     # biggest_win_home_df = total_home_wins.loc[total_home_wins, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     biggest_win_away_gs = biggest_win_away.loc[:, "FTAG"].values[0]
     biggest_win_away_gc = biggest_win_away.loc[:, "FTHG"].values[0]
