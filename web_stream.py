@@ -4,22 +4,22 @@ import streamlit as st
 import plotly_express as px
 import numpy as np
 
-path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_3800_rows.csv"
+path = "https://raw.githubusercontent.com/TheButcherOfBlaviken/epldata/master/combined_3800_rows.csv"  # path to the publicly accessible data
 # path = "combined_3800_rows.csv"
-data = st.cache(pd.read_csv)(path)
+data = pd.read_csv(path)
 # print(data.shape)
 # print(data.columns)
 # print(data.head(10))
-table = data.iloc[:, :11]
+table = data.iloc[:, :11]  # all the rows and upto the 11th column
 # print(table.head(10))
-unsorted_teams = list(table["HomeTeam"].unique())
-teams = sorted(unsorted_teams)
+unsorted_teams = list(table["HomeTeam"].unique())  # finds out the individual names of the team but are unsorted
+teams = sorted(unsorted_teams)  # the team names are now sorted
 
 
 # def run():
 #     return
 
-
+# @st.cache(suppress_st_warning=True)
 def data(selection):
     #####################
     # GENERAL STATISTICS
@@ -38,10 +38,14 @@ def data(selection):
     total_away_wins = table.query(f"AwayTeam == '{selection}' and FTR == 'A'", inplace=False)  # away wins df
     total_home_losses = table.query(f"HomeTeam == '{selection}' and FTR == 'A'", inplace=False)  # home losses df
     total_away_losses = table.query(f"AwayTeam == '{selection}' and FTR == 'H'", inplace=False)  # away losses df
-    total_winning_ht_home = table.query(f"HomeTeam == '{selection}' and HTR == 'H'", inplace=False)      # winning at home at HT df
-    total_winning_ht_away = table.query(f"AwayTeam == '{selection}' and HTR == 'A'", inplace=False)      # winning at away at HT df
-    total_losing_ht_home = table.query(f"HomeTeam == '{selection}' and HTR == 'A'", inplace=False)      # losing at home at HT df
-    total_losing_ht_away = table.query(f"AwayTeam == '{selection}' and HTR == 'H'", inplace=False)      # losing at away at HT df
+    total_winning_ht_home = table.query(f"HomeTeam == '{selection}' and HTR == 'H'",
+                                        inplace=False)  # winning at home at HT df
+    total_winning_ht_away = table.query(f"AwayTeam == '{selection}' and HTR == 'A'",
+                                        inplace=False)  # winning at away at HT df
+    total_losing_ht_home = table.query(f"HomeTeam == '{selection}' and HTR == 'A'",
+                                       inplace=False)  # losing at home at HT df
+    total_losing_ht_away = table.query(f"AwayTeam == '{selection}' and HTR == 'H'",
+                                       inplace=False)  # losing at away at HT df
 
     total_winning_ht_home_count = len(total_winning_ht_home)
     total_winning_ht_away_count = len(total_winning_ht_away)
@@ -64,7 +68,7 @@ def data(selection):
     # end test block #
 
     # number of seasons appeared
-    no_of_seasons = played_total_count / 38  # number of seasons count
+    no_of_seasons = int(played_total_count / 38)  # number of seasons count
 
     # total clean sheets
     clean_sheets_home = table.query(f"HomeTeam == '{selection}' and FTAG == 0")  # home clean sheets df
@@ -81,22 +85,27 @@ def data(selection):
                      ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     home_waht_waft_count = len(home_waht_waft)
 
-    # Winning with more than 3 goals and a 2-goal GD
+    # # Winning with more than 3 goals and a 2-goal GD # #
+
+    # Creating a new column called 'gd' in each created DF and using eggs.sub(spam) to subtract spam from eggs
     total_home_wins['gd'] = total_home_wins["FTHG"].sub(total_home_wins["FTAG"])
     total_away_wins['gd'] = total_away_wins["FTAG"].sub(total_away_wins["FTHG"])
+
+    # finding gd > 2
     domination_wins_home = total_home_wins.loc[total_home_wins['gd'] > 2]
     domination_wins_away = total_away_wins.loc[total_away_wins['gd'] > 2]
+
     domination_win_at_home_count = len(domination_wins_home)
     domination_win_at_away_count = len(domination_wins_away)
+
+    # adding one DF to another DF at the end eggs.append(spam) to add spam at the end of eggs
     domination_wins = domination_wins_home.append(domination_wins_away).loc[:,
                       ["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     domination_win_count = len(domination_wins)
 
     # Winning with more than 2 goals and a clean-sheet
-    domination_with_cs = table.query(f"HomeTeam == '{selection}' and FTHG > 2 and FTAG == 0", inplace=False).loc[
-                         :,
-                         ["Date", "HomeTeam", "AwayTeam", "FTHG", "HTHG"]
-                         ]
+    domination_with_cs = table.query(f"HomeTeam == '{selection}' and FTHG > 2 and FTAG == 0", inplace=False).loc[:,
+                         ["Date", "HomeTeam", "AwayTeam", "FTHG", "HTHG"]]
 
     # pc of winning after being ahead at HT at home
     pc_of_ftw_htw = round((home_waht_waft_count / total_winning_ht_home_count) * 100, ndigits=2)
@@ -106,28 +115,25 @@ def data(selection):
 
     # Biggest win - home
 
-    # biggest_win_home_index = total_home_wins['gd'].idxmax()
+    # how to use many many conditions involving max and min
+    # biggest_win_home = total_home_wins.loc[(((total_home_wins["FTHG"] == total_home_wins["FTHG"].max()) > (
+    # total_home_wins["gd"] == total_home_wins["gd"].max())) & (total_home_wins["FTHG"] != total_home_wins["FTAG"]))["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
-    # biggest_win_home_scores = total_home_wins.loc[
-    #     total_home_wins["FTHG"] == total_home_wins["FTHG"].max()
-    #     ].values.tolist()
-
-    # biggest_win_home_index = pd.DataFrame(total_home_wins.loc[
-    #     total_home_wins["FTHG"] == total_home_wins["FTHG"].max()
-    #         ].index.tolist())
-    #
-    # # GD evaluator
-    # gd_list = [total_home_wins.loc[x, "FTAG"] for x in biggest_win_home_index]
-    # max_gd_index = list(np.where(gd_list == np.amax(gd_list)))
-
-    biggest_win_home = total_home_wins.loc[((total_home_wins["FTHG"] == total_home_wins["FTHG"].max()) &
-                                            (total_home_wins["FTHG"] != total_home_wins["FTAG"])),
+    biggest_win_home = total_home_wins.loc[(total_home_wins["gd"] == total_home_wins["gd"].max()) & (
+                total_home_wins["FTHG"] == total_home_wins["FTHG"].max()),
                                            ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+
+    # yeah i know the first thing is not required.
+    # wrote it just so that I remember that you can write multiple conditions like that.
+    # interestingly, the logic operators do not work like programming e.g. it's not && but &, not || but | and
+    # gte or lte is written => and <= respectively!
+    # biggest_win_home = biggest_gd_home.loc[biggest_gd_home["FTHG"] == biggest_gd_home["FTHG"].max(),
+    #                                         ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
     # biggest_win_home_df = total_home_wins.loc[total_home_wins, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     biggest_win_home_gs = biggest_win_home.loc[:, "FTHG"].values[0]
     biggest_win_home_gc = biggest_win_home.loc[:, "FTAG"].values[0]
-    biggest_win_home_opponent = biggest_win_home.loc[:, "AwayTeam"].values[0]
+    biggest_win_home_opponent = list(biggest_win_home.loc[:, "AwayTeam"].values)
 
     # Biggest win - away
 
@@ -142,14 +148,15 @@ def data(selection):
     #     biggest_win_away_gs = total_away_wins.loc[i, "FTAG"].values[0]
     #     biggest_win_away_opponent = total_away_wins.loc[i, "HomeTeam"].values[0]
 
-    biggest_win_away = total_away_wins.loc[((total_away_wins["FTAG"] == total_away_wins["FTAG"].max()) &
-                                            (total_away_wins["FTAG"] != total_away_wins["FTHG"])),
+    biggest_win_away = total_away_wins.loc[((total_away_wins["FTAG"] == total_away_wins["FTAG"].max()) & (
+            total_away_wins["FTAG"] != total_away_wins["FTHG"]) & (
+                                                    total_away_wins["gd"] == total_away_wins["gd"].max())),
                                            ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
     # biggest_win_home_df = total_home_wins.loc[total_home_wins, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     biggest_win_away_gs = biggest_win_away.loc[:, "FTAG"].values[0]
     biggest_win_away_gc = biggest_win_away.loc[:, "FTHG"].values[0]
-    biggest_win_away_opponent = biggest_win_away.loc[:, "HomeTeam"].values[0]
+    biggest_win_away_opponent = list(biggest_win_away.loc[:, "HomeTeam"].values)
 
     #####################
     # COMEBACK STATISTICS
@@ -183,35 +190,36 @@ def data(selection):
 
     # matches lost after being ahead at half-time at home
     home_waht_laft = table.query(f"HomeTeam == '{selection}' and HTR == 'H' and FTR == 'A'", inplace=False).loc[
-                     :,
-                     ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+                     :, ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     home_waht_laft_count = len(home_waht_laft)
 
     # pc of losing after being ahead at HT at home
     pc_of_ftl_htw = round((home_waht_laft_count / total_winning_ht_home_count) * 100, ndigits=2)
 
     # Biggest loss - home
-    total_home_losses['gd'] = total_home_losses["FTAG"].sub(total_home_losses["FTHG"], axis=0)
+    total_home_losses['gd'] = total_home_losses["FTAG"].sub(total_home_losses["FTHG"])
 
-    biggest_loss_home = total_home_losses.loc[((total_home_losses["FTAG"] == total_home_losses["FTAG"].max()) &
-                                               (total_home_losses["FTAG"] != total_home_losses["FTHG"])),
-                                              ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
-
-    # biggest_loss_home_index = biggest_loss_home[["gd"]].idxmax()
+    biggest_loss_home_gd = total_home_losses.loc[total_home_losses["gd"] == total_home_losses["gd"].max()]
+    biggest_loss_home = biggest_loss_home_gd.loc[biggest_loss_home_gd["FTAG"] == biggest_loss_home_gd["FTAG"].max(),
+                                                 ["Date", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     biggest_loss_home_gs = biggest_loss_home.loc[:, "FTAG"].values[0]
     biggest_loss_home_gc = biggest_loss_home.loc[:, "FTHG"].values[0]
-    biggest_loss_home_opponent = biggest_loss_home.loc[:, "AwayTeam"].values[0]
+    biggest_loss_home_opponent = list(biggest_loss_home.loc[:, "AwayTeam"])
 
     # Biggest loss - away
-    total_away_losses['gd'] = total_away_losses["FTHG"].sub(total_away_losses["FTAG"], axis=0)
+    total_away_losses['gd'] = total_away_losses["FTHG"].sub(total_away_losses["FTAG"])
 
-    biggest_loss_away = total_away_losses.loc[((total_away_losses["FTHG"] == total_away_losses["FTHG"].max()) &
-                                               (total_away_losses["FTHG"] != total_away_losses["FTAG"].max())),
-                                              ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
+    # USE MULTIPLE AND CONDITIONS LIKE THIS #                                                                                               # HEY CHECK THIS OUT #
+    # biggest_loss_away = total_away_losses.loc[((total_away_losses["FTHG"] == total_away_losses["FTHG"].max()) &
+    #                                            (total_away_losses["FTHG"] != total_away_losses["FTAG"].max())),
+    #                                           ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
 
+    biggest_loss_away_gd = total_away_losses.loc[total_away_losses['gd'] == total_away_losses['gd'].max()]
+    biggest_loss_away = biggest_loss_away_gd.loc[biggest_loss_away_gd["FTHG"] == biggest_loss_away_gd["FTHG"].max(),
+                                                 ["Date", "HomeTeam", "FTHG", "FTAG", "HTHG", "HTAG"]]
     biggest_loss_away_gc = biggest_loss_away.loc[:, "FTHG"].values[0]
     biggest_loss_away_gs = biggest_loss_away.loc[:, "FTAG"].values[0]
-    biggest_loss_away_opponent = biggest_loss_away.loc[:, "HomeTeam"].values[0]
+    biggest_loss_away_opponent = list(biggest_loss_away.loc[:, "HomeTeam"])
 
     # analytics
 
@@ -228,14 +236,13 @@ def data(selection):
     f'### Won {pc_of_ftw_htw}% of home games after being ahead at half-time: {home_waht_waft_count} time(s)'
     st.write(home_waht_waft)
 
-    f'### Won by over 3 goals with at least 2 GD. Home: {domination_win_at_home_count} time(s). ' \
-        f'Away: {domination_win_at_away_count} time(s)'
+    f'### Won by over 3 goals with at least 2 GD. Home: {domination_win_at_home_count} time(s). Away: {domination_win_at_away_count} time(s)'
     st.write(domination_wins)
 
-    f'### Biggest victory at home: {biggest_win_home_gs}-{biggest_win_home_gc} against {biggest_win_home_opponent}'
+    f'### Biggest victory at home: {biggest_win_home_gs}-{biggest_win_home_gc} against {", ".join(biggest_win_home_opponent)}'
     st.write(biggest_win_home)
 
-    f'### Biggest victory away: {biggest_win_away_gc}-{biggest_win_away_gs} against {biggest_win_away_opponent}'
+    f'### Biggest victory away: {biggest_win_away_gc}-{biggest_win_away_gs} against {", ".join(biggest_win_away_opponent)}'
     st.write(biggest_win_away)
 
     '## > Hairdryer treatment from the Gaffer?'
@@ -250,16 +257,14 @@ def data(selection):
     f"### Lost {pc_of_ftl_htw}% of home games after being ahead at half-time: {len(home_waht_laft)} time(s)"
     st.write(home_waht_laft)
 
-    f'### Biggest loss at home: {biggest_loss_home_gs}-{biggest_loss_home_gc} against {biggest_loss_home_opponent}'
+    f'### Biggest loss at home: {biggest_loss_home_gs}-{biggest_loss_home_gc} against {", ".join(biggest_loss_home_opponent)}'
     st.write(biggest_loss_home)
 
-    f'### Biggest loss away: {biggest_loss_away_gc}-{biggest_loss_away_gs} against {biggest_loss_away_opponent}'
+    f'### Biggest loss away: {biggest_loss_away_gc}-{biggest_loss_away_gs} against {", ".join(biggest_loss_away_opponent)}'
     st.write(biggest_loss_away)
 
     # '## Win statistics for all teams'
-
     '''
-    
     '''
 
 
@@ -268,11 +273,13 @@ def data(selection):
 '''
 
 clubs = st.selectbox('Pick your club:', teams)
+# clubs = "Arsenal"         # Testing #
 data(clubs)
 
 '''
 ### Thanks for visiting! <3
-Please wait for more updates! 
+Please wait for more updates! \n 
+Nabil Adnan
 '''
 
 # if __name__ == "__main__":
